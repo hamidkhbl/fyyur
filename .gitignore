@@ -1,1 +1,4 @@
-venv
+\venv
+\__pycache__
+__pycache__/config.cpython-37.pyc
+__pycache__/app.cpython-37.pyc

@@ -12,6 +12,8 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from flask_migrate import Migrate
+import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -21,7 +23,8 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-# TODO: connect to a local postgresql database
+# connect to a local postgresql database
+migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -56,6 +59,12 @@ class Artist(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+  __tablename__ = 'Show'
+  id = db.Column(db.Integer, primary_key=True)
+  artist_id = db.relationship('Artist', backref='list', lazy=True)
+  venue_id = db.relationship('Venue', backref='list', lazy=True)
+  start_time = db.Column(db.DateTime)
 
 #----------------------------------------------------------------------------#
 # Filters.
