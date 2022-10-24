@@ -13,6 +13,8 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+from sqlalchemy import Column, ForeignKey, Integer, Table
+from sqlalchemy.orm import declarative_base, relationship
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -24,6 +26,10 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # TODO: connect to a local postgresql database
+# 1. Created a Postgresql (createdb fuyyurdb)
+# 2. Run "flask db init", "flask db migrate" and "flask db upgrade"
+migrate = Migrate(app, db)
+Base = declarative_base()
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -51,13 +57,33 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    website_link = db.Column(db.String(120))
+    looking_for_venues = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+    
+class Genre(db.Model):
+  __tablename__ = 'Genre'
+  id = db.Column(db.Integer, primary_key = True)
+  titile = db.Column(db.String(30), nullable=False)
+  describe = db.Column(db.String(500), nullable = True)
+
+Artist_Genre = Table(
+  "Artist_Genre",
+  Base.metadata,
+  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key=True),
+  db.Column('genre_id', db.Integer, db.ForeignKey('Genre.id'), primary_key=True)
+)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+  __tablename__='Show'
+  id= db.Column(db.Integer, primary_key= True)
+  artist_id = db.Column(db.Integer, ForeignKey('Artist.id'), nullable = False)
+  venue_id = db.Column(db.Integer, ForeignKey('Venue.id'), nullable = False)
+  date = db.Column(db.DateTime(timezone=True), nullable= False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -89,27 +115,28 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  data = []
+  # data=[{
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "venues": [{
+  #     "id": 1,
+  #     "name": "The Musical Hop",
+  #     "num_upcoming_shows": 0,
+  #   }, {
+  #     "id": 3,
+  #     "name": "Park Square Live Music & Coffee",
+  #     "num_upcoming_shows": 1,
+  #   }]
+  # }, {
+  #   "city": "New York",
+  #   "state": "NY",
+  #   "venues": [{
+  #     "id": 2,
+  #     "name": "The Dueling Pianos Bar",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }]
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
