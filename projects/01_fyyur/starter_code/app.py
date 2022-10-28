@@ -16,6 +16,10 @@ from forms import *
 from flask_migrate import Migrate
 from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.orm import declarative_base, relationship
+import datetime
+import pytz
+
+utc=pytz.UTC
 #endregion
 
 
@@ -68,6 +72,7 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship('Show', backref = db.backref('venue_show'))
     
     def __repr__(self):
       return self.name
@@ -104,8 +109,9 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
+  now = utc.localize(datetime.datetime.utcnow())
   data = Venue.query.filter_by(id = venue_id).one()
-  return render_template('pages/show_venue.html', venue=data)
+  return render_template('pages/show_venue.html', venue=data, now = now)
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
@@ -222,40 +228,32 @@ class Artist(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
     website_link = db.Column(db.String(120))
     looking_for_venues = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
+    shows = db.relationship('Show', backref = db.backref('artist_show'))
     def __repr__(self):
       return self.name
     
 @app.route('/artists')
 def artists():
-  # TODO: replace with real data returned from querying the database
   data = Artist.query.all()
   return render_template('pages/artists.html', artists=data)
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-  # search for "band" should return "The Wild Sax Band".
   response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
+    "count": Artist.query.filter(Artist.name.contains(request.form['search_term'])).count(),
+    "data": Artist.query.filter(Artist.name.contains(request.form['search_term'])).all()
   }
+
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-  # shows the artist page with the given artist_id
-  # TODO: replace with real artist data from the artist table, using artist_id
+  now = utc.localize(datetime.datetime.utcnow())
   data = Artist.query.filter_by(id = artist_id).one()
-  return render_template('pages/show_artist.html', artist=data)
+  return render_template('pages/show_artist.html', artist=data, now = now)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
