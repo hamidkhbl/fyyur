@@ -176,6 +176,10 @@ def edit_venue(venue_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
   try:
+    seeking_talent_value = (True if str(request.form['seeking_talent'])=='y' else False)
+  except:
+    seeking_talent_value = False
+  try:
     venue = Venue.query.filter_by(id = venue_id).one()
     venue.name = request.form['name']
     venue.city = request.form['city']
@@ -186,7 +190,7 @@ def edit_venue_submission(venue_id):
     venue.facebook_link = request.form['facebook_link']
     venue.website_link = request.form['website_link']
     venue.image_link = request.form['image_link']
-    venue.seeking_talent = True if request.form['seeking_talent'] == 'y' else False
+    venue.seeking_talent = seeking_talent_value
     venue.seeking_description = request.form['seeking_description']
     db.session.commit()
     flash('Venue ' + request.form['name'] + ' was successfully edited!')
@@ -264,15 +268,19 @@ def edit_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
   try:
+    looking_for_venues = (True if str(request.form['seeking_venue'])=='y' else False)
+  except:
+    looking_for_venues = False
+  try:
     artist= Artist.query.filter_by(id = artist_id).one()
-    artist.name = request.form['name'],
-    artist.city = request.form['city'],
-    artist.state = request.form['state'],
-    artist.phone = request.form['phone'],
-    artist.image_link = request.form['image_link'],
-    artist.facebook_link = request.form['facebook_link'],
-    artist.website_link = request.form['website_link'],
-    artist.looking_for_venues = True if request.form['seeking_venue']=='y' else False,
+    artist.name = request.form['name']
+    artist.city = request.form['city']
+    artist.state = request.form['state']
+    artist.phone = request.form['phone']
+    artist.image_link = request.form['image_link']
+    artist.facebook_link = request.form['facebook_link']
+    artist.website_link = request.form['website_link']
+    artist.looking_for_venues = looking_for_venues
     artist.seeking_description = request.form['seeking_description']
     db.session.commit()
     flash('Artist ' + request.form['name'] + ' was successfully edited!')
