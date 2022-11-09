@@ -53,9 +53,11 @@
 		{% if show.start_time >= now %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
-				<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
-				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
-				<h5>{{ show.artist.name}}</h5>
+				<a href="/artists/{{ show.artist_id }}">
+					<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
+					<h5>{{ show.artist_name }}</h5>
+					<h5>{{ show.artist.name}}</h5>
+				</a>
 				<h6>{{ show.start_time|datetime('full') }}</h6>
 			</div>
 		</div>
@@ -70,9 +72,11 @@
 		{% if show.start_time < now %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
-				<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
-				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
-				<h5>{{ show.artist.name}}</h5>
+				<a href="/artists/{{ show.artist_id }}">
+					<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
+					<h5>{{ show.artist_name }}</h5>
+					<h5>{{ show.artist.name}}</h5>
+				</a>
 				<h6>{{ show.start_time|datetime('full') }}</h6>
 				
 			</div>
