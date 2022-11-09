@@ -111,7 +111,7 @@ def search_venues():
 def show_venue(venue_id):
   now = utc.localize(datetime.datetime.utcnow())
   data = Venue.query.filter_by(id = venue_id).one()
-  return render_template('pages/show_venue.html', venue=data, now = now)
+  return render_template('pages/show_venue.html', venue=data, now=now)
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
@@ -252,8 +252,8 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
   now = utc.localize(datetime.datetime.utcnow())
-  data = Artist.query.filter_by(id = artist_id).one()
-  return render_template('pages/show_artist.html', artist=data, now = now)
+  data = Artist.query.filter_by(id=artist_id).one()
+  return render_template('pages/show_artist.html', artist=data, now=now)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
@@ -292,6 +292,10 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   try:
+    looking_for_venues = (True if str(request.form['seeking_venue'])=='y' else False)
+  except:
+    looking_for_venues = False
+  try:
     artist = Artist(
       name = request.form['name'],
       city = request.form['city'],
@@ -300,7 +304,7 @@ def create_artist_submission():
       image_link = request.form['image_link'],
       facebook_link = request.form['facebook_link'],
       website_link = request.form['website_link'],
-      looking_for_venues = True if request.form['seeking_venue']=='y' else False,
+      looking_for_venues = looking_for_venues,
       seeking_description = request.form['seeking_description']
     )
     db.session.add(artist)
