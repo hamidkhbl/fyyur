@@ -120,35 +120,42 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  form = VenueForm()
-  try:
-    seeking_talent_value = (True if str(request.form['seeking_talent'])=='y' else False)
-  except:
-    seeking_talent_value = False
-  
-  try:
-    venue = Venue(
-      name = request.form['name'],
-      city = request.form['city'],
-      state = request.form['state'],
-      address = request.form['address'],
-      phone = request.form['phone'],
-      image_link = request.form['image_link'],
-      facebook_link = request.form['facebook_link'],
-      website_link = request.form['website_link'],
-      seeking_talent = seeking_talent_value,
-      seeking_description = request.form['seeking_description']
-    )
-    db.session.add(venue)
-    db.session.commit()
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  except Exception as e:
-    db.session.rollback()
-    flash('An error occurred. Venue '+request.form['name']+' could not be listed.' + str(e), 'error')
-  finally:
-    db.session.close()
+  form = VenueForm(request.form)
+  if form.validate():
+    try:
+      seeking_talent_value = (True if str(request.form['seeking_talent'])=='y' else False)
+    except:
+      seeking_talent_value = False
     
-  return render_template('pages/home.html')
+    try:
+      venue = Venue(
+        name = request.form['name'],
+        city = request.form['city'],
+        state = request.form['state'],
+        address = request.form['address'],
+        phone = request.form['phone'],
+        image_link = request.form['image_link'],
+        facebook_link = request.form['facebook_link'],
+        website_link = request.form['website_link'],
+        seeking_talent = seeking_talent_value,
+        seeking_description = request.form['seeking_description']
+      )
+      db.session.add(venue)
+      db.session.commit()
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    except Exception as e:
+      db.session.rollback()
+      flash('An error occurred. Venue '+request.form['name']+' could not be listed.' + str(e), 'error')
+    finally:
+      db.session.close()
+    return render_template('pages/home.html')
+  else:
+    message = []
+    for field, err in form.errors.items():
+        message.append(field + ' ' + '|'.join(err))
+    for m in message:
+      flash('Error ' + str(m))
+    return render_template('forms/new_venue.html', form=form)
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -299,33 +306,41 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  try:
-    looking_for_venues = (True if str(request.form['seeking_venue'])=='y' else False)
-  except:
-    looking_for_venues = False
-  try:
-    artist = Artist(
-      name = request.form['name'],
-      city = request.form['city'],
-      state = request.form['state'],
-      phone = request.form['phone'],
-      image_link = request.form['image_link'],
-      facebook_link = request.form['facebook_link'],
-      website_link = request.form['website_link'],
-      looking_for_venues = looking_for_venues,
-      seeking_description = request.form['seeking_description']
-    )
-    db.session.add(artist)
-    db.session.commit()
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  except Exception as e:
-    db.session.rollback()
-    print(str(e))
-    flash('Something went wrong! '+ str(e), 'error')
-  finally:
-    db.session.close()
-    
-  return render_template('pages/home.html')
+  form = ArtistForm(request.form)
+  if form.validate():
+    try:
+      looking_for_venues = (True if str(request.form['seeking_venue'])=='y' else False)
+    except:
+      looking_for_venues = False
+    try:
+      artist = Artist(
+        name = request.form['name'],
+        city = request.form['city'],
+        state = request.form['state'],
+        phone = request.form['phone'],
+        image_link = request.form['image_link'],
+        facebook_link = request.form['facebook_link'],
+        website_link = request.form['website_link'],
+        looking_for_venues = looking_for_venues,
+        seeking_description = request.form['seeking_description']
+      )
+      db.session.add(artist)
+      db.session.commit()
+      flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    except Exception as e:
+      db.session.rollback()
+      print(str(e))
+      flash('Something went wrong! '+ str(e), 'error')
+    finally:
+      db.session.close()
+    return render_template('pages/home.html')
+  else:
+    message = []
+    for field, err in form.errors.items():
+        message.append(field + ' ' + '|'.join(err))
+    for m in message:
+      flash('Error ' + str(m))
+  return render_template('forms/new_artist.html', form=form)
 
 #endregion
 
@@ -358,20 +373,29 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
-  # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
-  show = Show(
-    artist_id = request.form['artist_id'],
-    venue_id = request.form['venue_id'],
-    start_time = request.form['start_time']
-  )
-  db.session.add(show)
-  db.session.commit()
-  # on successful db insert, flash success
-  flash('Show was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Show could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+  form = ShowForm(request.form)
+  if form.validate():
+    try:
+      show = Show(
+        artist_id = request.form['artist_id'],
+        venue_id = request.form['venue_id'],
+        start_time = request.form['start_time']
+      )
+      db.session.add(show)
+      db.session.commit()
+    # on successful db insert, flash success
+      flash('Show was successfully listed!')
+    except:
+      flash('Something went wrong, please try again!')
+      return render_template('forms/new_show.html', form=form)
+  else:
+    message = []
+    for field, err in form.errors.items():
+        message.append(field + ' ' + '|'.join(err))
+    for m in message:
+      flash('Error ' + str(m))
+    return render_template('forms/new_show.html', form=form)
+
   return render_template('pages/home.html')
 #endregion
 
